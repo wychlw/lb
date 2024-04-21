@@ -77,6 +77,8 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.ksp.com.google.devtools.ksp.gradle.plugin)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

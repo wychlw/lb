@@ -7,11 +7,13 @@ import com.wychlw.work1.data.ProjColDb
 import com.wychlw.work1.data.ProjDatabase
 import com.wychlw.work1.data.ProjDb
 import com.wychlw.work1.data.ProjItemDb
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-suspend fun tryInit(context: Context) {
+fun CoroutineScope.tryInit(context: Context) = launch {
     val dao = ProjDatabase.getInstance(context).projDao()
     dao.getAllProj().collect() {
         println("Current init stat: ${it.isNotEmpty()}")
@@ -29,6 +31,7 @@ suspend fun tryInit(context: Context) {
             dao.insertProjCol(
                 ProjColDb(0, 1, "Done")
             )
+
         }
     }
 }

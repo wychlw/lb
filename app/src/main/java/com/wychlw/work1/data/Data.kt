@@ -1,25 +1,5 @@
 package com.wychlw.work1.data
 
-import android.content.Context
-import androidx.room.ColumnInfo
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.PrimaryKey
-import androidx.room.Query
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.Update
-import com.wychlw.work1.Index.Proj
-import com.wychlw.work1.Index.ProjColumn
-import com.wychlw.work1.Index.ProjItem
-import com.wychlw.work1.Index.ProjItemAction
-import com.wychlw.work1.Index.ProjItemStatus
-import com.wychlw.work1.Index.ProjItemTimeline
-import kotlinx.coroutines.flow.Flow
-import java.time.LocalDateTime
-
 //fun getProjDataAll(dao: ProjDao): List<Proj> {
 //    val projList = dao.getAllProj()
 //    var projData: List<Proj> = listOf()
