@@ -1,5 +1,7 @@
 package com.wychlw.work1
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,11 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Add
@@ -21,44 +21,28 @@ import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.sharp.AddCircle
-import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,68 +50,117 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.wychlw.work1.Index.ProjColumn
+import com.wychlw.work1.Index.ProjItem
+import com.wychlw.work1.Index.ProjItemStatus
+import com.wychlw.work1.Index.ProjListViewModel
+import com.wychlw.work1.data.ProjColDb
+import com.wychlw.work1.data.ProjDatabase
+import com.wychlw.work1.data.ProjDb
+import com.wychlw.work1.data.ProjItemDb
+import com.wychlw.work1.data.tryInit
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
+import kotlinx.coroutines.runBlocking
 
-class Index : ComponentActivity() {
+class IndexActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var test_item_1 = ProjItem(1, "Test")
-        test_item_1.status = ProjItemStatus.Open
-        var test_col1 = ProjColumn("Backlog")
-        test_col1.items = listOf(test_item_1)
-        var test_item_2 = ProjItem(2, "Test2")
-        test_item_2.status = ProjItemStatus.Closed
-        var test_col2 = ProjColumn("Done")
-        test_col2.items = listOf(test_item_2, test_item_1)
-
-        var test_proj = Proj(1, "Test")
-        test_proj.columns = listOf(test_col1, test_col2)
-        var test_proj_lst = listOf(test_proj)
         setContent {
-            AppTheme {
-                IndexView(projLst = test_proj_lst)
-            }
+            IndexActivityCreate(context = applicationContext)
         }
     }
 }
 
-enum class ProjItemAction {
-    Open, Add, Move, Convert, Assign, Commit, Close
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+fun InitIndexUiState(state: MutableState<IndexUiState>) {
+    val scope = rememberCoroutineScope()
+    scope.launch {
+        tryInit(state.value.context!!)
+        val dao = ProjDatabase.getInstance(state.value.context!!).projDao()
+        dao.getAllProj().collect() {
+            println("Begin Collect")
+            for (i in it) {
+                println(i.name)
+            }
+//            state.value.projList.value = it
+//            state.value.currentProj.value = it[0]
+        }
+    }
 }
 
-enum class ProjItemStatus {
-    Draft, Open, Closed
+@Composable
+fun IndexActivityCreate(modifier: Modifier = Modifier, context: Context) {
+    val exampleProj = remember {
+        mutableStateOf(ProjDb(1, "Local", 1))
+    }
+    val exampleProjList = remember {
+        mutableStateOf(listOf(exampleProj.value))
+    }
+    val exampleColDraft = remember {
+        mutableStateOf(ProjColDb(1, 1, "Draft"))
+    }
+    val exampleColInprog = remember {
+        mutableStateOf(ProjColDb(2, 1, "In Progress"))
+    }
+    val exampleColFin = remember {
+        mutableStateOf(ProjColDb(3, 1, "Finish"))
+    }
+    val exampleColList = remember {
+        mutableStateOf(listOf(exampleColDraft.value, exampleColInprog.value, exampleColFin.value))
+    }
+    val exampleItem1 = remember {
+        mutableStateOf(ProjItemDb(1, 1, 1, "Exp1", 0, ""))
+    }
+    val exampleItemList = remember {
+        mutableStateOf(listOf(exampleItem1.value))
+    }
+
+    val state = remember {
+        mutableStateOf(
+            IndexUiState(
+                context,
+                exampleProjList,
+                exampleProj,
+                exampleColList,
+                exampleColDraft,
+                exampleItemList
+            )
+        )
+    }
+
+    InitIndexUiState(state)
+
+    AppTheme {
+        IndexView(state = state)
+    }
 }
 
-class ProjItemTimeline(var by: String = "", var action: ProjItemAction = ProjItemAction.Open, var time: LocalDateTime = LocalDateTime.now(), var content: String = ""){
-}
-
-class ProjItem(var id: Int = 0, var title: String = "") {
-    var timeline: List<ProjItemTimeline> = listOf()
-    var status: ProjItemStatus = ProjItemStatus.Draft
-    var assign: String = ""
-}
-
-class ProjColumn(var name: String = "") {
-    var items: List<ProjItem> = listOf()
-}
-
-class Proj(var id: Int = 0, var name: String = "") {
-    var columns: List<ProjColumn> = listOf()
-}
+data class IndexUiState(
+    val context: Context?,
+    var projList: MutableState<List<ProjDb>>,
+    var currentProj: MutableState<ProjDb>,
+    var currentColList: MutableState<List<ProjColDb>>,
+    var currentCol: MutableState<ProjColDb>,
+    var currentItemList: MutableState<List<ProjItemDb>>
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IndexView(modifier: Modifier = Modifier, projLst: List<Proj>) {
+fun IndexView(
+    modifier: Modifier = Modifier,
+    state: MutableState<IndexUiState>
+) {
     val expendColumnSelector = remember { mutableStateOf(false) }
-    val currentColumn = remember { mutableStateOf(0) }
-    val drawerState = remember { mutableStateOf(false)}
-    val currentProj = remember { mutableStateOf(0)}
-    val proj = projLst[currentProj.value]
+    val drawerState = remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
-            PrimaryTopBar(projName = proj.name, drawerState = drawerState)
+            PrimaryTopBar(projName = state.value.currentProj.value.name, drawerState = drawerState)
         },
         floatingActionButton = {
             FloatAddButton()
@@ -138,7 +171,7 @@ fun IndexView(modifier: Modifier = Modifier, projLst: List<Proj>) {
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            Box (
+            Box(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 8.dp, top = 8.dp)
@@ -157,14 +190,16 @@ fun IndexView(modifier: Modifier = Modifier, projLst: List<Proj>) {
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "${proj.columns[currentColumn.value].name} (${proj.columns[currentColumn.value].items.size})",
+                            text = "${state.value.currentCol.value.name} (${state.value.currentItemList.value.size})",
                             modifier = modifier
                                 .align(Alignment.CenterVertically)
                                 .padding(start = 16.dp),
                         )
                         Spacer(modifier.weight(1f))
                         IconButton(
-                            onClick = { expendColumnSelector.value = !expendColumnSelector.value },
+                            onClick = {
+                                expendColumnSelector.value = !expendColumnSelector.value
+                            },
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.ArrowDropDown,
@@ -173,47 +208,66 @@ fun IndexView(modifier: Modifier = Modifier, projLst: List<Proj>) {
                         }
                     }
                 }
-                DropdownMenu(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    expanded = expendColumnSelector.value,
-                    onDismissRequest = { expendColumnSelector.value = false },
-                ) {
-                    for (i in proj.columns) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = i.name,
-                                    modifier = Modifier.padding(8.dp)
-                                )
-                            },
-                            onClick = {
-                                currentColumn.value = proj.columns.indexOf(i)
-                                expendColumnSelector.value = false
-                            },
-                            colors = MenuDefaults.itemColors(
-                                textColor = MaterialTheme.colorScheme.onSurface
-
-                            )
-                        )
-                    }
-
-                }
+                ColumnSelector(
+                    modifier = modifier,
+                    state = state,
+                    expendColumnSelector = expendColumnSelector
+                )
             }
             Box(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 8.dp)
             ) {
-                ProjCol(modifier = modifier, item = proj.columns[currentColumn.value])
+                ProjCol(modifier = modifier, state = state)
             }
         }
     }
 }
 
+@Composable
+fun ColumnSelector(
+    modifier: Modifier = Modifier,
+    state: MutableState<IndexUiState>,
+    expendColumnSelector: MutableState<Boolean>
+) {
+    DropdownMenu(
+        modifier = modifier
+            .fillMaxWidth(),
+        expanded = expendColumnSelector.value,
+        onDismissRequest = { expendColumnSelector.value = false },
+    ) {
+        for (i in state.value.currentColList.value) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = i.name,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                },
+                onClick = {
+                    println("Last: ${state.value.currentCol.value.name}")
+                    state.value.currentCol.value = i
+                    println("Current: ${state.value.currentCol.value.name}")
+                    expendColumnSelector.value = false
+                },
+                colors = MenuDefaults.itemColors(
+                    textColor = MaterialTheme.colorScheme.onSurface
+
+                )
+            )
+        }
+
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrimaryTopBar(modifier: Modifier = Modifier, projName: String, drawerState: MutableState<Boolean>) {
+fun PrimaryTopBar(
+    modifier: Modifier = Modifier,
+    projName: String,
+    drawerState: MutableState<Boolean>
+) {
     val scope = rememberCoroutineScope()
     TopAppBar(
         colors = topAppBarColors(
@@ -229,7 +283,7 @@ fun PrimaryTopBar(modifier: Modifier = Modifier, projName: String, drawerState: 
         navigationIcon = {
             IconButton(
                 onClick = {
-                          drawerState.value = true
+                    drawerState.value = true
                 },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -275,12 +329,12 @@ fun FloatAddButton() {
 }
 
 @Composable
-fun ProjCol(modifier: Modifier = Modifier, item: ProjColumn) {
+fun ProjCol(modifier: Modifier = Modifier, state: MutableState<IndexUiState>) {
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
-        for (i in item.items) {
-            Row (
+        for (i in state.value.currentItemList.value) {
+            Row(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp)
@@ -292,8 +346,8 @@ fun ProjCol(modifier: Modifier = Modifier, item: ProjColumn) {
 }
 
 @Composable
-fun ProjCard(modifier: Modifier = Modifier, item: ProjItem) {
-    OutlinedCard (
+fun ProjCard(modifier: Modifier = Modifier, item: ProjItemDb) {
+    OutlinedCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -307,16 +361,18 @@ fun ProjCard(modifier: Modifier = Modifier, item: ProjItem) {
     ) {
         Row {
             val iconIm = when (item.status) {
-                ProjItemStatus.Draft -> Icons.Outlined.AddCircle
-                ProjItemStatus.Open -> Icons.Outlined.Info
-                ProjItemStatus.Closed -> Icons.Outlined.CheckCircle
+                0 -> Icons.Outlined.AddCircle
+                1 -> Icons.Outlined.Info
+                2 -> Icons.Outlined.CheckCircle
+                else -> Icons.Outlined.AddCircle
             }
             val iconCo = when (item.status) {
-                ProjItemStatus.Draft -> Color.Gray
-                ProjItemStatus.Open -> Color(0xFF2E8B57)
-                ProjItemStatus.Closed -> Color(0xFFDA70D6)
+                0 -> Color.Gray
+                1 -> Color(0xFF2E8B57)
+                2 -> Color(0xFFDA70D6)
+                else -> Color.Gray
             }
-            Icon (
+            Icon(
                 imageVector = iconIm,
                 contentDescription = "Status",
                 tint = iconCo,
@@ -340,7 +396,7 @@ fun ProjCard(modifier: Modifier = Modifier, item: ProjItem) {
             )
         }
         Row {
-            Text (
+            Text(
                 text = item.title,
                 modifier = modifier
                     .padding(8.dp)
@@ -354,20 +410,46 @@ fun ProjCard(modifier: Modifier = Modifier, item: ProjItem) {
 
 @Preview(showBackground = true)
 @Composable
-fun IndexPreview() {
-    var test_item_1 = ProjItem(1, "Test")
-    test_item_1.status = ProjItemStatus.Open
-    var test_col1 = ProjColumn("Backlog")
-    test_col1.items = listOf(test_item_1)
-    var test_item_2 = ProjItem(2, "Test2")
-    test_item_2.status = ProjItemStatus.Closed
-    var test_col2 = ProjColumn("Done")
-    test_col2.items = listOf(test_item_2, test_item_1)
+fun IndexActivityPreview() {
+    val exampleProj = remember {
+        mutableStateOf(ProjDb(1, "Local", 1))
+    }
+    val exampleProjList = remember {
+        mutableStateOf(listOf(exampleProj.value))
+    }
+    val exampleColDraft = remember {
+        mutableStateOf(ProjColDb(1, 1, "Draft"))
+    }
+    val exampleColInprog = remember {
+        mutableStateOf(ProjColDb(2, 1, "In Progress"))
+    }
+    val exampleColFin = remember {
+        mutableStateOf(ProjColDb(3, 1, "Finish"))
+    }
+    val exampleColList = remember {
+        mutableStateOf(listOf(exampleColDraft.value, exampleColInprog.value, exampleColFin.value))
+    }
+    val exampleItem1 = remember {
+        mutableStateOf(ProjItemDb(1, 1, 1, "Exp1", 0, ""))
+    }
+    val exampleItemList = remember {
+        mutableStateOf(listOf(exampleItem1.value))
+    }
 
-    var test_proj = Proj(1, "TestLocal")
-    test_proj.columns = listOf(test_col1, test_col2)
-    var test_proj_lst = listOf(test_proj)
+    val state = remember {
+        mutableStateOf(
+            IndexUiState(
+                null,
+                exampleProjList,
+                exampleProj,
+                exampleColList,
+                exampleColDraft,
+                exampleItemList
+            )
+        )
+    }
+
     AppTheme {
-        IndexView(modifier = Modifier, projLst = test_proj_lst)
+        IndexView(modifier = Modifier, state = state)
     }
 }

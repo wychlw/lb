@@ -11,19 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Work1"
+        android:largeHeap="true"
         tools:targetApi="31" >
         <activity
-            android:name=".tmp"
-            android:exported="false"
-            android:label="@string/title_activity_tmp"
-            android:theme="@style/Theme.Work1.NoActionBar" />
-        <activity
-            android:name=".ChatView"
-            android:exported="false"
-            android:label="@string/title_activity_chat_view"
-            android:theme="@style/Theme.Work1" />
-        <activity
-            android:name=".index"
+            android:name=".IndexActivity"
             android:exported="true"
             android:label="@string/title_activity_index"
             android:theme="@style/Theme.Work1" >
