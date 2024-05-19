@@ -2,6 +2,9 @@ package com.wychlw.work1.AddItem
 
 import android.content.Intent
 import android.net.Uri
+import android.view.ViewGroup
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
@@ -13,6 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.wychlw.work1.AppState
+import com.wychlw.work1.CurrentView
+import com.wychlw.work1.functional.InitWebview
 
 @Composable
 fun AddDescription(modifier: Modifier = Modifier, state: MutableState<AddItemUiState>) {
@@ -45,11 +52,9 @@ fun AddDescription(modifier: Modifier = Modifier, state: MutableState<AddItemUiS
             onClick = {
                 val url =
                     "https://docs.github.com/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
-                val urlIntent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse(url)
-                )
-                ctx.startActivity(urlIntent)
+                val url_enc = Uri.encode(url)
+                val appState = AppState.getInstance()
+                appState.value.navController.navigate(CurrentView.Webview + "?url=" + url_enc)
             }
         ) {
             Text(
@@ -59,3 +64,4 @@ fun AddDescription(modifier: Modifier = Modifier, state: MutableState<AddItemUiS
         }
     }
 }
+

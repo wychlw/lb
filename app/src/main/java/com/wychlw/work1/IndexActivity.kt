@@ -1,5 +1,6 @@
 package com.wychlw.work1
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,8 +21,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.wychlw.work1.AddItem.AddItemView
 import com.wychlw.work1.AddItem.initAddItemUiState
+import com.wychlw.work1.AddProj.AddProjView
+import com.wychlw.work1.AddProj.initAddProjUiState
 import com.wychlw.work1.Index.IndexUiState
 import com.wychlw.work1.Index.IndexView
+import com.wychlw.work1.ItemDetail.ItemDetailView
+import com.wychlw.work1.ItemDetail.initItemDetailUiState
+import com.wychlw.work1.data.ProjItemDb
+import com.wychlw.work1.functional.InitWebview
 
 class IndexActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +40,6 @@ class IndexActivity : ComponentActivity() {
 }
 @Composable
 fun IndexActivityCreate(modifier: Modifier = Modifier) {
-
 
     val indexState = IndexUiState.getInstance()
     val navController = rememberNavController()
@@ -76,6 +82,38 @@ fun IndexActivityCreate(modifier: Modifier = Modifier) {
             composable(route = CurrentView.AddItem) {
                 AddItemView(modifier = modifier, state = initAddItemUiState())
             }
+            composable(route = CurrentView.Webview + "?url={url}") { backStackEntry ->
+                val url = backStackEntry.arguments?.getString("url")
+                if (url != null) {
+                    val url_dec = Uri.decode(url)
+                    println("url_dec: $url_dec")
+                    InitWebview(url = url_dec)
+                }
+            }
+            composable(route = CurrentView.AddProj) {
+                AddProjView(modifier = modifier, state = initAddProjUiState())
+            }
+            composable(route = CurrentView.ItemDetail + "?iid={iid}&cid={cid}&id={id}&title={title}&status={status}&assign={assign}") { backStackEntry ->
+                val iid = backStackEntry.arguments?.getString("iid")
+                val cid = backStackEntry.arguments?.getString("cid")
+                val id = backStackEntry.arguments?.getString("id")
+                val title = backStackEntry.arguments?.getString("title")
+                val status = backStackEntry.arguments?.getString("status")
+                val assign = backStackEntry.arguments?.getString("assign")
+                if (iid != null && cid != null && id != null && title != null && status != null && assign != null) {
+                    println("TO: $iid $cid $id $title $status $assign")
+                    val item = ProjItemDb(
+                        iid.toInt(),
+                        cid.toInt(),
+                        id.toInt(),
+                        title,
+                        status.toInt(),
+                        assign
+                    )
+                    ItemDetailView(state = initItemDetailUiState(item))
+                }
+            }
+
         }
     }
 }
@@ -88,8 +126,9 @@ fun IndexActivityPreview() {
 
     AppTheme {
 
-//                IndexView(state = IndexUiState.getInstance())
-
-                AddItemView(state = initAddItemUiState())
+//        IndexView(state = IndexUiState.getInstance())
+//      AddItemView(state = initAddItemUiState())
+        ItemDetailView(state = initItemDetailUiState(IndexUiState.getInstance().value.currentItemList.value[0]))
+//        AddProjView(state = initAddProjUiState())
     }
 }

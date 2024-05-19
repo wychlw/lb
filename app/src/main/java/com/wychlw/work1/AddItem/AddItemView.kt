@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wychlw.work1.AppState
 import com.wychlw.work1.CurrentView
 import com.wychlw.work1.data.ProjDatabase
 import com.wychlw.work1.data.ProjItemDb

@@ -61,7 +61,10 @@ fun initIndexUiState(context: Context): MutableState<IndexUiState> {
         mutableStateOf(listOf(exampleColDraft.value, exampleColInprog.value, exampleColFin.value))
     }
     val exampleItemList = remember {
-        mutableStateOf(listOf<ProjItemDb>())
+        mutableStateOf(listOf<ProjItemDb>(
+            ProjItemDb(0,0,0,"TT",0,""),
+            ProjItemDb(0,0,0,"TT2",0,"")
+        ))
     }
 
     val state = remember {

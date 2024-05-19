@@ -25,14 +25,5 @@ fun ProjCol(modifier: Modifier = Modifier, state: MutableState<IndexUiState>) {
                 ProjCard(modifier = modifier, item = it)
             }
         }
-//        for (i in state.value.currentItemList.value) {
-//            Row(
-//                modifier = modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 8.dp)
-//            ) {
-//                ProjCard(modifier = modifier, item = i)
-//            }
-//        }
     }
 }

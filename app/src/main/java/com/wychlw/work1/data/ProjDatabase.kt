@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ProjDb::class, ProjColDb::class, ProjItemDb::class, ProjItemTimelineDb::class], version =1)
+@Database(entities = [ProjDb::class, ProjColDb::class, ProjItemDb::class, ProjItemTimelineDb::class], version =2)
 abstract class ProjDatabase : RoomDatabase() {
     abstract fun projDao(): ProjDao
 

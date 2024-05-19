@@ -10,6 +10,9 @@ class CurrentView {
     companion object {
         val Index = "index"
         val AddItem = "additem"
+        val Webview = "webview"
+        val AddProj = "addproj"
+        val ItemDetail = "itemdetail"
     }
 }
 
@@ -21,9 +24,6 @@ data class AppState(
         @Composable
         fun getInstance(navController: NavController?): MutableState<AppState> {
             if (instance == null) {
-                val currentViewInit = remember {
-                    mutableStateOf(CurrentView.Index)
-                }
                 if (navController == null) {
                     throw RuntimeException("You should Init global state!!")
                 }

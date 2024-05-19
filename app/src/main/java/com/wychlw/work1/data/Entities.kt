@@ -11,11 +11,15 @@ data class ProjDb(
     @ColumnInfo(name = "projName")
     val name: String,
     @ColumnInfo(name = "id")
-    val id: Int
+    val id: Int,
 
-    // For future use
-//    val type: Int,
-//    val org: String,
+    // For remote use
+    @ColumnInfo(name = "remote_id")
+    val remote_id: Int = 0,
+    @ColumnInfo(name = "user")
+    val user: String = "",
+    @ColumnInfo(name = "token")
+    val token: String = ""
 )
 
 @Entity(tableName = "projCol")

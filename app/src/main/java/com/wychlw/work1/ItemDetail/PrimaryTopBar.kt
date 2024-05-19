@@ -1,9 +1,7 @@
-package com.wychlw.work1.Index
+package com.wychlw.work1.ItemDetail
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DrawerState
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -16,16 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import kotlinx.coroutines.launch
+import com.wychlw.work1.AppState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrimaryTopBar(
     modifier: Modifier = Modifier,
-    projName: String,
-    drawerState: DrawerState
+    state: MutableState<ItemDetailUiState>,
 ) {
-    val scope = rememberCoroutineScope()
+    val appState = AppState.getInstance()
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -33,18 +30,14 @@ fun PrimaryTopBar(
         ),
         title = {
             Text(
-                text = projName,
+                text = state.value.item.value.title,
                 maxLines = 1
             )
         },
         navigationIcon = {
             IconButton(
                 onClick = {
-                    scope.launch {
-                        drawerState.apply {
-                            if (isClosed) open() else close()
-                        }
-                    }
+                    appState.value.navController.popBackStack()
                 },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -52,7 +45,7 @@ fun PrimaryTopBar(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Menu,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "More",
                 )
             }
@@ -65,10 +58,7 @@ fun PrimaryTopBar(
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             ) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = "More"
-                )
+
             }
         }
     )

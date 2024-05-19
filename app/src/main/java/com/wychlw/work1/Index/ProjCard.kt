@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wychlw.work1.AppState
+import com.wychlw.work1.CurrentView
 import com.wychlw.work1.data.ProjItemDb
 import com.wychlw.work1.functional.getStatIcon
 
@@ -35,7 +37,12 @@ fun ProjCard(modifier: Modifier = Modifier, item: ProjItemDb) {
             defaultElevation = 6.dp
         ),
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        onClick = {
+            val appState = AppState.getInstance()
+            appState.value.navController.navigate(CurrentView.ItemDetail + "?iid=${item.iid}&cid=${item.cid}&id=${item.id}&title=${item.title}&status=${item.status}&assign=${item.assign}")
+            ///${item.iid}/${item.cid}/${item.id}/${item.title}/${item.status}/${item.assign}
+        }
     ) {
         Row {
             val iconI = getStatIcon(item.status)
